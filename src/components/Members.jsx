@@ -1,18 +1,50 @@
 // src/components/Members.jsx
 import React, { useState } from 'react';
-import { Card, SectionTitle, Avatar, Tag, Btn } from './UI';
-import { MEMBERS } from '../data/initialData';
+import { Card, SectionTitle, Avatar, Tag } from './UI';
+import InviteMemberCard, { buildInviteMail } from './InviteMemberCard';
 
-export default function Members({ expenses, balances }) {
-  const [members, setMembers] = useState(MEMBERS);
-  const [newName, setNewName] = useState('');
+const COLORS = ['#7c6ff7', '#22c98a', '#3b9eff', '#f45c5c', '#f5a623', '#f472b6', '#34d399'];
 
-  const addMember = () => {
-    if (!newName.trim()) return;
-    const initials = newName.trim().slice(0, 2).toUpperCase();
-    const colors = ['#7c6ff7', '#22c98a', '#3b9eff', '#f45c5c', '#f5a623', '#f472b6', '#34d399'];
-    setMembers(prev => [...prev, { id: Date.now(), name: newName.trim(), avatar: initials, color: colors[prev.length % colors.length] }]);
-    setNewName('');
+export default function Members({ expenses, balances, members, setMembers, onToast, groupName = 'Goa Trip' }) {
+  const [invites, setInvites] = useState([]);
+
+  const openMailClient = (invite) => {
+    const { href } = buildInviteMail({
+      name: invite.name,
+      email: invite.email,
+      inviterName: 'You',
+      groupName,
+    });
+    window.location.href = href;
+  };
+
+  const sendInvite = (invite) => {
+    const record = { ...invite, sentAt: new Date().toLocaleDateString('en-IN') };
+    setInvites(prev => [...prev, record]);
+    openMailClient(record);
+    onToast?.(`✉ Invite email drafted for ${record.email}`);
+  };
+
+  const resendInvite = (invite) => {
+    openMailClient(invite);
+    onToast?.(`✉ Invite re-sent to ${invite.email}`);
+  };
+
+  const cancelInvite = (invite) => {
+    setInvites(prev => prev.filter(i => i.email !== invite.email));
+    onToast?.(`Invite to ${invite.email} cancelled`);
+  };
+
+  const acceptInvite = (invite) => {
+    setInvites(prev => prev.filter(i => i.email !== invite.email));
+    setMembers(prev => [...prev, {
+      id: Date.now(),
+      name: invite.name,
+      email: invite.email,
+      avatar: invite.name.slice(0, 2).toUpperCase(),
+      color: COLORS[prev.length % COLORS.length],
+    }]);
+    onToast?.(`✓ ${invite.name} joined the group`);
   };
 
   return (
@@ -29,11 +61,11 @@ export default function Members({ expenses, balances }) {
                 display: 'flex', alignItems: 'center', gap: 12, padding: '12px 0',
                 borderBottom: '1px solid var(--border)',
               }}>
-                <Avatar name={m.name} size={42} />
+                <Avatar name={m.name} size={42} initials={m.avatar} color={m.color} />
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: 14, fontWeight: 600 }}>{m.name}</div>
                   <div style={{ fontSize: 11, color: 'var(--text3)', marginTop: 2 }}>
-                    Paid ₹{paid.toLocaleString('en-IN')} total · {expenses.filter(e => e.payer === m.name).length} transactions
+                    {m.email ? `${m.email} · ` : ''}Paid ₹{paid.toLocaleString('en-IN')} total · {expenses.filter(e => e.payer === m.name).length} transactions
                   </div>
                   <div style={{ marginTop: 6, display: 'flex', gap: 6 }}>
                     <Tag label={bal >= 0 ? `Gets +₹${Math.abs(bal).toLocaleString('en-IN')}` : `Owes ₹${Math.abs(bal).toLocaleString('en-IN')}`} type={bal >= 0 ? 'green' : 'red'} />
@@ -49,24 +81,18 @@ export default function Members({ expenses, balances }) {
             );
           })}
 
-          {/* Add member */}
-          <div style={{ display: 'flex', gap: 8, marginTop: 14 }}>
-            <input
-              value={newName}
-              onChange={e => setNewName(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && addMember()}
-              placeholder="Add new member..."
-              style={{
-                flex: 1, background: 'var(--bg3)', border: '1px solid var(--border)',
-                borderRadius: 'var(--r)', padding: '8px 12px', color: 'var(--text)',
-                fontSize: 12, outline: 'none',
-              }}
-            />
-            <Btn primary onClick={addMember}>+ Add</Btn>
-          </div>
         </Card>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <InviteMemberCard
+            invites={invites}
+            memberEmails={members.map(m => m.email).filter(Boolean)}
+            onInvite={sendInvite}
+            onResend={resendInvite}
+            onCancel={cancelInvite}
+            onAccept={acceptInvite}
+          />
+
           <Card>
             <SectionTitle>Group Stats</SectionTitle>
             {[
@@ -88,7 +114,7 @@ export default function Members({ expenses, balances }) {
               const count = expenses.filter(e => e.payer === m.name).length;
               return (
                 <div key={m.id} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-                  <Avatar name={m.name} size={26} />
+                  <Avatar name={m.name} size={26} initials={m.avatar} color={m.color} />
                   <div style={{ flex: 1 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 3 }}>
                       <span>{m.name}</span>

@@ -32,7 +32,7 @@ const s = {
   groupMeta: { color: 'var(--text3)', fontSize: 11 },
 };
 
-export default function Sidebar({ page, setPage }) {
+export default function Sidebar({ page, setPage, memberCount = 5 }) {
   return (
     <div style={s.sidebar}>
       <div style={s.logo}>
@@ -56,7 +56,7 @@ export default function Sidebar({ page, setPage }) {
       <div style={s.footer}>
         <div style={s.groupBadge}>
           <div style={s.groupName}>🏠 Goa Trip 2025</div>
-          <div style={s.groupMeta}>5 members · Active</div>
+          <div style={s.groupMeta}>{memberCount} members · Active</div>
         </div>
       </div>
     </div>
