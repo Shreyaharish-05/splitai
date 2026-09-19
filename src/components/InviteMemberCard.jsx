@@ -22,7 +22,7 @@ export function buildInviteMail({ name, email, inviterName, groupName }) {
   };
 }
 
-export default function InviteMemberCard({ invites, onInvite, onResend, onCancel, onAccept }) {
+export default function InviteMemberCard({ invites, memberEmails = [], onInvite, onResend, onCancel, onAccept }) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
@@ -31,7 +31,11 @@ export default function InviteMemberCard({ invites, onInvite, onResend, onCancel
     const trimmedEmail = email.trim();
     if (!name.trim()) return setError('Enter a name');
     if (!EMAIL_RE.test(trimmedEmail)) return setError('Enter a valid email address');
-    if (invites.some(i => i.email.toLowerCase() === trimmedEmail.toLowerCase())) {
+    const key = trimmedEmail.toLowerCase();
+    if (memberEmails.some(e => e.toLowerCase() === key)) {
+      return setError('That email already belongs to a group member');
+    }
+    if (invites.some(i => i.email.toLowerCase() === key)) {
       return setError('That email is already invited');
     }
     setError('');

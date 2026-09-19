@@ -13,7 +13,7 @@ import LoginForm from './components/LoginForm';
 import SignupForm from './components/SignupForm';
 import Groups from './components/Groups';
 import { Btn } from './components/UI';
-import { INITIAL_EXPENSES, INITIAL_BALANCES } from './data/initialData';
+import { INITIAL_EXPENSES, INITIAL_BALANCES, MEMBERS } from './data/initialData';
 
 const PAGE_TITLES = {
   dashboard: 'Dashboard',
@@ -28,6 +28,7 @@ const PAGE_TITLES = {
 export default function App() {
   const [page, setPage] = useState('dashboard');
   const [expenses, setExpenses] = useState(INITIAL_EXPENSES);
+  const [members, setMembers] = useState(MEMBERS);
   const [balances, setBalances] = useState(INITIAL_BALANCES);
   const [showModal, setShowModal] = useState(false);
   const [toast, setToast] = useState(null);
@@ -170,7 +171,7 @@ export default function App() {
       case 'balances': return <Balances expenses={expenses} balances={balances} />;
       case 'settlements': return <Settlements />;
       case 'insights': return <Insights />;
-      case 'members': return <Members expenses={expenses} balances={balances} onToast={showToast} />;
+      case 'members': return <Members expenses={expenses} balances={balances} members={members} setMembers={setMembers} onToast={showToast} />;
       case 'groups': return <Groups currentGroup={currentGroup} onGroupChange={setCurrentGroup} />;
       default: return null;
     }
@@ -186,7 +187,7 @@ export default function App() {
 
   return (
     <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
-      <Sidebar page={page} setPage={setPage} />
+      <Sidebar page={page} setPage={setPage} memberCount={members.length} />
 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         {/* Topbar */}

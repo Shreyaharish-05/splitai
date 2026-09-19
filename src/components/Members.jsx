@@ -2,12 +2,10 @@
 import React, { useState } from 'react';
 import { Card, SectionTitle, Avatar, Tag } from './UI';
 import InviteMemberCard, { buildInviteMail } from './InviteMemberCard';
-import { MEMBERS } from '../data/initialData';
 
 const COLORS = ['#7c6ff7', '#22c98a', '#3b9eff', '#f45c5c', '#f5a623', '#f472b6', '#34d399'];
 
-export default function Members({ expenses, balances, onToast, groupName = 'Goa Trip' }) {
-  const [members, setMembers] = useState(MEMBERS);
+export default function Members({ expenses, balances, members, setMembers, onToast, groupName = 'Goa Trip' }) {
   const [invites, setInvites] = useState([]);
 
   const openMailClient = (invite) => {
@@ -88,6 +86,7 @@ export default function Members({ expenses, balances, onToast, groupName = 'Goa 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <InviteMemberCard
             invites={invites}
+            memberEmails={members.map(m => m.email).filter(Boolean)}
             onInvite={sendInvite}
             onResend={resendInvite}
             onCancel={cancelInvite}
