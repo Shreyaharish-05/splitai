@@ -2,15 +2,17 @@
 import React from 'react';
 import { MEMBERS, CAT_COLORS, CAT_ICONS } from '../data/initialData';
 
-export function Avatar({ name, size = 32 }) {
-  const m = MEMBERS.find(x => x.name === name) || MEMBERS[0];
+export function Avatar({ name, size = 32, initials, color }) {
+  const m = MEMBERS.find(x => x.name === name);
+  const label = initials || m?.avatar || (name || '?').slice(0, 2).toUpperCase();
+  const c = color || m?.color || MEMBERS[0].color;
   return (
     <div style={{
       width: size, height: size, borderRadius: '50%',
-      background: m.color + '22', color: m.color,
+      background: c + '22', color: c,
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       fontSize: size * 0.34, fontWeight: 600, flexShrink: 0,
-    }}>{m.avatar}</div>
+    }}>{label}</div>
   );
 }
 

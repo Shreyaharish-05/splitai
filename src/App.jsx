@@ -170,7 +170,7 @@ export default function App() {
       case 'balances': return <Balances expenses={expenses} balances={balances} />;
       case 'settlements': return <Settlements />;
       case 'insights': return <Insights />;
-      case 'members': return <Members expenses={expenses} balances={balances} />;
+      case 'members': return <Members expenses={expenses} balances={balances} onToast={showToast} />;
       case 'groups': return <Groups currentGroup={currentGroup} onGroupChange={setCurrentGroup} />;
       default: return null;
     }
